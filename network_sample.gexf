@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">
+    <graph mode="static" defaultedgetype="undirected">
+        <attributes class="node">
+            <attribute id="0" title="announced" type="string"/>
+            <attribute id="1" title="name" type="string"/>
+        </attributes>
+        <nodes>
+            <node id="0" label="1916">
+                    <attvalues>
+                        <attvalue for="0" value="161.24.0.0/16 161.24.0.0/17 161.24.128.0/17"/>
+                        <attvalue for="1" value="Associao Rede Nacional de Ensino e Pesquisa"/>
+                    </attvalues>
+            </node>
+            <node id="1" label="262847">
+                    <attvalues>
+                        <attvalue for="0" value="143.137.84.0/22 143.137.84.0/23 143.137.86.0/23"/>
+                        <attvalue for="1" value="Hoinaski and Sklasky Ltda"/>
+                    </attvalues>
+            </node>
+            <node id="2" label="18881">
+                    <attvalues>
+                        <attvalue for="0" value="177.16.0.0/14 177.16.0.0/19 177.16.32.0/19"/>
+                        <attvalue for="1" value="TELEFNICA BRASIL S.A"/>
+                    </attvalues>
+            </node>
+            <node id="3" label="2914">
+                    <attvalues>
+                        <attvalue for="0" value="212.119.0.0/19 213.130.32.0/19 213.198.0.0/17"/>
+                        <attvalue for="1" value="NTT America, Inc."/>
+                    </attvalues>
+            </node>
+            <node id="4" label="12956">
+                    <attvalues>
+                        <attvalue for="0" value="23.1.208.0/20 23.14.16.0/20"/>
+                        <attvalue for="1" value="Telefonica International Wholesale Services II, S.L.U."/>
+                    </attvalues>
+            </node>
+        </nodes>
+        <edges>
+            <edge id="0" source="0" target="1" />
+            <edge id="1" source="0" target="2" />
+            <edge id="2" source="0" target="3" />
+            <edge id="3" source="1" target="2" />
+            <edge id="4" source="2" target="4" />
+            <edge id="5" source="4" target="3" />
+        </edges>
+    </graph>
+</gexf>
