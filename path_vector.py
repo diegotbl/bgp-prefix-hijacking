@@ -2,7 +2,7 @@ import queue
 
 
 def bgp_update(graph):
-    """Updates accessible ips and paths, using path_vector algorithm"""
+    """Updates accessible ips and paths, using path_vector algorithm for each node"""
     for i in len(graph):
         q = queue.Queue()
         q.put(str(i))
