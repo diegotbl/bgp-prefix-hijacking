@@ -40,7 +40,7 @@ def read():
     # Include current AS as path source to each ip
     for i in range(len(graph)):
         for j in range(n_ip_announced):
-            graph.node[str(i)]['path'][j].append(graph.node[str(i)]['label'])
+            graph.node[str(i)]['path'][j].append(str(i))
 
     print("Graph loaded\n")
 
