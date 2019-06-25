@@ -29,11 +29,19 @@ def bgp_update(graph):
 
         path_vector(graph, q, fig, pos, labels)     # runs algorithm and animates
 
-    print(len(graph.node['0']['accessible']))
-    print(len(graph.node['1']['accessible']))
-    print(len(graph.node['2']['accessible']))
-    print(len(graph.node['3']['accessible']))
-    print(len(graph.node['4']['accessible']))
+    # DEBUG - check if number of accessible ips match for each AS
+    if debug.check_all_ips_are_accessible(graph):
+        print("Protocol succeeded! All AS's can access all announced ip's.")
+    else:
+        print("Protocol failed! Not all AS's can access all announced ip's.")
+
+    # DEBUG - check some paths to see if they are as expected
+    path_source_ip(graph, 0, "23.1.208.0/20")
+    path_source_ip(graph, 0, "213.130.32.0/19")
+    path_source_ip(graph, 0, "143.137.84.0/23")
+    path_source_ip(graph, 1, "23.1.208.0/20")
+    path_source_ip(graph, 1, "213.130.32.0/19")
+    path_source_ip(graph, 1, "143.137.84.0/23")
 
     return graph
 
@@ -81,7 +89,7 @@ def path_vector(graph, q, fig, pos, labels):
 
             return
 
-    ani = matplotlib.animation.FuncAnimation(fig, update, frames=7, interval=1000, repeat=False)
+    ani = matplotlib.animation.FuncAnimation(fig, update, frames=5, interval=1000, repeat=False)
     plt.show()  # display
 
 
@@ -106,16 +114,32 @@ def send(graph, source_id, dest_id):
     return graph
 
 
-def eval_index_path_to_update(graph, source_id, ip_accessible_dest):
+def eval_index_path_to_update(graph, source_id, ip):
     source_that_announced = ""
     idx = 0
 
     for path in graph.node[source_id]['path']:
-        if ip_accessible_dest in graph.node[path[-1]]['announced']:
+        if ip in graph.node[path[-1]]['announced']:
             source_that_announced = path[-1]
-            idx = graph.node[path[-1]]['announced'].index(ip_accessible_dest)
+            idx = graph.node[path[-1]]['announced'].index(ip)
 
     for i in range(int(source_that_announced)):
         idx = idx + len(graph.node[str(i)]['announced'])
 
     return idx
+
+
+def path_source_ip(graph, source, ip):
+    """Shows path traveled by a packet from source AS to a destination AS that has announced the informed ip"""
+
+    path = graph.node[str(source)]['path'][eval_index_path_to_update(graph, str(source), ip)]
+    string_path = ""
+    for node in path:
+        if string_path != "":
+            string_path = string_path + " -> " + graph.node[node]['label']
+        else:
+            string_path = graph.node[node]['label']
+
+    print("path from " + graph.node[str(source)]['label'] + " to AS that announced ip " + ip + " is: ")
+    print("\t" + string_path)
+    print("\n")
