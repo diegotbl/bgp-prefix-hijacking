@@ -89,7 +89,7 @@ def path_vector(graph, q, fig, pos, labels):
 
             return
 
-    ani = matplotlib.animation.FuncAnimation(fig, update, frames=5, interval=1000, repeat=False)
+    ani = matplotlib.animation.FuncAnimation(fig, update, frames=5, interval=500, repeat=False)
     plt.show()  # display
 
 
@@ -98,18 +98,26 @@ def bgp_hijack(graph):
 
 
 def send(graph, source_id, dest_id):
-    """Updates path table and accessible ip's according to source and destination id's"""
+    """Updates destination's path table and accessible ip's according to source and destination id's"""
 
     print("sending message from " + graph.node[source_id]['label'] + " to " + graph.node[dest_id]['label'])     # DEBUG
     for ip_accessible_dest in graph.node[source_id]['accessible']:
+        # if this ip is not yet accessible by dest then make it accessible and update path
+        index_path_to_update = eval_index_path_to_update(graph, source_id, ip_accessible_dest)
         if ip_accessible_dest not in graph.node[dest_id]['accessible']:
             graph.node[dest_id]['accessible'].append(ip_accessible_dest)
-            index_path_to_update = eval_index_path_to_update(graph, source_id, ip_accessible_dest)
             for node_in_path in graph.node[source_id]['path'][index_path_to_update]:
                 graph.node[dest_id]['path'][index_path_to_update].append(node_in_path)
-            if source_id == '2' and dest_id == '4':
-                print(index_path_to_update)
-                debug.print_nodes(graph)
+        # else check if it's possible to improve path and improve it
+        else:
+            print("This ip was already accessible for AS " + graph.node[source_id]['label'])        # DEBUG
+            current_path_size = len(graph.node[dest_id]['path'][index_path_to_update])
+            possible_new_path = [dest_id]
+            for node_in_path in graph.node[source_id]['path'][index_path_to_update]:
+                possible_new_path.append(node_in_path)
+
+            if current_path_size > len(possible_new_path):
+                graph.node[dest_id]['path'][index_path_to_update] = possible_new_path  # swap current for new
 
     return graph
 
@@ -133,13 +141,21 @@ def path_source_ip(graph, source, ip):
     """Shows path traveled by a packet from source AS to a destination AS that has announced the informed ip"""
 
     path = graph.node[str(source)]['path'][eval_index_path_to_update(graph, str(source), ip)]
+    string_path = list_to_string_path(graph, path)
+
+    print("path from " + graph.node[str(source)]['label'] + " to AS that announced ip " + ip + " is: ")
+    print("\t" + string_path)
+    print("\n")
+
+
+def list_to_string_path(graph, list_path):
+    """Converts a path list to a more comprehensible string path. Example: [1916, 262847] becomes "1916 -> 262847" """
+
     string_path = ""
-    for node in path:
+    for node in list_path:
         if string_path != "":
             string_path = string_path + " -> " + graph.node[node]['label']
         else:
             string_path = graph.node[node]['label']
 
-    print("path from " + graph.node[str(source)]['label'] + " to AS that announced ip " + ip + " is: ")
-    print("\t" + string_path)
-    print("\n")
+    return string_path
