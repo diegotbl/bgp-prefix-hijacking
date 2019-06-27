@@ -69,5 +69,28 @@ def select_ip(graph):
         return ip
 
 
+def select_as(graph, ip):
+    """Returns an AS from the network, either random or user-provided.
+    The AS cannot be the same that announces the hijacked IP"""
+
+    aut_sys = input("Select an AS to be the hijacker: (type 'random' to select a random existing one)\n")
+    if aut_sys != 'random':
+        for i in range(len(graph)):
+            if aut_sys == graph.node[str(i)]['label']:
+                if ip in graph.node[str(i)]['announced']:
+                    print("The chosen AS is the same that announced the selected IP. Try something else.")
+                    return select_as(graph, ip)
+                print("The Autonomous System that will hijack the selected IP is: " + aut_sys)
+                return str(i)                                               # return index corresponding to that AS
+        print("The provided AS is not part of this network. Try again.")
+        return select_as(graph, ip)                                         # try again
+    else:
+        node_id = str(randint(0, len(graph)-1))                             # generate a random node
+        while ip in graph.node[node_id]['announced']:
+            node_id = str(randint(0, len(graph) - 1))
+        print("The randomly selected AS is: " + graph.node[node_id]['label'])
+        return node_id
+
+
 def bgp_hijack(graph):
     pass

@@ -9,6 +9,7 @@ def simulate(graph):
 
     # Now we select an IP and an AS. Both can be random or user-provided
     ip = bgp.select_ip(graph)
+    aut_sys = bgp.select_as(graph, ip)
 
     # Now, the hijacking
     bgp.bgp_hijack(graph)
