@@ -22,7 +22,7 @@ def bgp_update(graph):
         fig, ax = plt.subplots(figsize=(12, 6))
         ax.remove()
         print("node " + graph.node[str(i)]['label'] + ":")                      # DEBUG
-        q.put(str(i))                                                           # initialize queue to start até node i
+        q.put(str(i))                                                           # initialize queue to start at node i
         print("node " + str(i) + " added to queue")                             # DEBUG
         for j in range(len(graph)):                                             # sets 'visited' fields to false
             graph.node[str(j)]['visited'] = False

@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 def print_nodes(graph):
     """Prints graph nodes for debug"""
 
-    for i in range(5):
+    for i in range(len(graph)):
         print(graph.nodes[str(i)])
     print("\n")
 

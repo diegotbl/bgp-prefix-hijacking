@@ -51,9 +51,6 @@ def path_vector(graph, q, fig, pos, labels):
             node_string = q.get()
             print("node " + graph.node[node_string]['label'] + " removed from queue")       # DEBUG
             neighbors = list(graph.neighbors(node_string))
-            print("Neighbors:")                                                             # DEBUG
-            for neighbor in neighbors:
-                print("\t" + graph.node[neighbor]['label'])                                 # DEBUG
             if not graph.node[node_string]['visited']:
                 # Sends message asking for each neighbor to add announced ip's
                 for neighbor in neighbors:
@@ -79,17 +76,19 @@ def path_vector(graph, q, fig, pos, labels):
 
     # Unfortunately FuncAnimation doesn't accept a dynamic frame number, so we need to specify a sufficiently big
     # number so that all nodes are visited and the queue is empty at the end
-    ani = matplotlib.animation.FuncAnimation(fig, update, frames=6, interval=100, repeat=False)
+    if has_been_hijacked(graph):
+        ani = matplotlib.animation.FuncAnimation(fig, update, frames=200000, interval=100, repeat=False)
+    else:
+        ani = matplotlib.animation.FuncAnimation(fig, update, frames=200000, interval=1, repeat=False)
     plt.show(block=False)                                                           # display
-    plt.pause(2)
+    plt.pause(3)
     plt.close()
 
 
 def send(graph, source_id, dest_id):
     """Updates destination's path table and accessible ip's according to source and destination id's"""
 
-    print("sending message from " + graph.node[source_id]['label'] + " to " + graph.node[dest_id]['label'])     # DEBUG
-    # Make ip's accessible by source AS also accessible to destination AS
+    # Make IPs accessible by source AS also accessible to destination AS
     for ip_accessible_dest in graph.node[source_id]['accessible']:
         index_path_to_update = eval_index_path_to_update(graph, source_id, ip_accessible_dest)  # finds index of path
         # If this ip is not yet accessible by dest then make it accessible and update path
@@ -220,6 +219,6 @@ def node_coloring(graph, wrong_paths):
             if not affected:
                 node_colors.append("#008844")                   # green for visited and not affected by hijack AS's
         else:
-            node_colors.append("#c49102")                       # yellow for not visited
+            node_colors.append("#008844")
 
     return node_colors

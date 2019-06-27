@@ -8,7 +8,7 @@ def simulate(graph):
     # Starts by updating all tables to make all ip's accessible for all AS's using path vector protocol
     bgp.bgp_update(graph)
 
-    # Now we select an IP and an AS. Both can be random or user-provided
+    # Now we select an IP and an AS to be the attacker. Both can be random or user-provided
     ip = bgp.select_ip(graph)
     aut_sys = bgp.select_as(graph, ip)
     print("Before the attack: paths to ip " + ip + " from each AS:\n")

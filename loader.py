@@ -11,7 +11,12 @@ def read():
 
     # Request name of graph source file
     # file = input("Type gexf file name (without extension): ")
-    file = "network_sample"
+    # Each file requires a different frames parameter on animation at path_vector.path_vector
+    # network_sample requires frame=6
+    # network1 requires frame=17
+    # network2 requires frame=20000
+
+    file = "network2"
     file = file + ".gexf"
 
     # Loading graph from GEXF file
