@@ -31,7 +31,9 @@ def bgp_update(graph):
     # DEBUG - check if number of accessible ips match for each AS
     if print_checks_and_debug.check_all_ips_are_accessible(graph):
         print("Protocol succeeded! All AS's can access all announced ip's. Printing final graph.")
-        print_checks_and_debug.draw_graph(fig, graph, pos, labels, "#008800")
+        wrong_paths, correct_paths = find_correct_and_wrong_paths(graph)
+        node_colors = node_coloring(graph, wrong_paths)
+        print_checks_and_debug.draw_graph(fig, graph, pos, labels, node_colors, wrong_paths, correct_paths)
 
     else:
         print("Protocol failed! Not all AS's can access all announced ip's.")
@@ -64,25 +66,22 @@ def path_vector(graph, q, fig, pos, labels):
                 graph.node[node_string]['visited'] = True                                   # sets AS as visited
                 print(graph.node[node_string]['label'] + " has been visited")               # DEBUG
 
-        # Specifying colors for nodes
-        node_colors = []
-        for i in range(len(graph)):
-            if graph.node[str(i)]['visited']:                                       # bluish green for visited AS's
-                node_colors.append("#008888")
-            else:                                                                   # red for not visited
-                node_colors.append("#880000")
+        wrong_paths, correct_paths = find_correct_and_wrong_paths(graph)
 
-        print_checks_and_debug.draw_graph(fig, graph, pos, labels, node_colors)
+        # Specifying colors for nodes
+        node_colors = node_coloring(graph, wrong_paths)
+
+        print_checks_and_debug.draw_graph(fig, graph, pos, labels, node_colors, wrong_paths, correct_paths)
 
         if q.empty():
-            print("empty queue")  # DEBUG
+            print("empty queue")                                                    # DEBUG
             return
 
     # Unfortunately FuncAnimation doesn't accept a dynamic frame number, so we need to specify a sufficiently big
     # number so that all nodes are visited and the queue is empty at the end
     ani = matplotlib.animation.FuncAnimation(fig, update, frames=6, interval=100, repeat=False)
-    plt.show(block=False)  # display
-    plt.pause(3)  # display
+    plt.show(block=False)                                                           # display
+    plt.pause(2)
     plt.close()
 
 
@@ -146,3 +145,81 @@ def list_paths(graph, ip):
     """List current paths from all AS's to that IP"""
     for i in range(len(graph)):
         path_source_ip(graph, str(i), ip)
+
+
+def find_correct_and_wrong_paths(graph):
+    """Returns the paths that are have been mistakenly followed (when hijack has happened) and the paths that have
+    been correctly followed"""
+
+    wrong_paths = []            # initialization
+    correct_paths = []          # initialization
+    hijacked = has_been_hijacked(graph)
+
+    for i in range(len(graph)):
+        if hijacked:
+            if graph.node[str(i)]['hijack']:                        # if node i hijacked some IP
+                # If it's possible to hijack more than one IP, the following line should be fixed
+                idx = eval_index_path_to_update(graph, '0', graph.node[str(i)]['hijack'][0])
+                for j in range(len(graph)):
+                    path = graph.node[str(j)]['path'][idx]          # check all paths related to that IP
+                    # If the last element of path is the node that hijacked, that means the path is wrong
+                    if len(path) != 1 and path[-1] == str(i):
+                        for k in range(len(path) - 1):
+                            aux = small_first(path[k], path[k+1])   # to avoid duplicated tuples: ('0','1')!=('1','0')
+
+                            if tuple(aux) not in wrong_paths:
+                                wrong_paths.append(tuple(aux))
+
+                    if len(path) != 1 and path[-1] != str(i):
+                        for k in range(len(path) - 1):
+                            aux = small_first(path[k], path[k + 1])  # to avoid duplicated tuples: ('0','1')!=('1','0')
+
+                            if tuple(aux) not in correct_paths:
+                                correct_paths.append(tuple(aux))
+        else:
+            for j in range(len(graph)):
+                for path in graph.node[str(j)]['path']:
+                    if len(path) != 1:
+                        for k in range(len(path) - 1):
+                            aux = small_first(path[k], path[k + 1])  # to avoid duplicated tuples: ('0','1')!=('1','0')
+
+                            if tuple(aux) not in correct_paths:
+                                    correct_paths.append(tuple(aux))
+
+    return wrong_paths, correct_paths
+
+
+def small_first(a, b):
+    if int(a) > int(b):
+        return [b, a]
+    else:
+        return [a, b]
+
+
+def has_been_hijacked(graph):
+    """Informs if the hijack has already happened or not"""
+
+    for i in range(len(graph)):
+        if graph.node[str(i)]['hijack']:
+            return True
+    return False
+
+
+def node_coloring(graph, wrong_paths):
+    node_colors = []
+
+    for i in range(len(graph)):
+        if graph.node[str(i)]['hijack']:
+            node_colors.append("#880000")                       # red for attacker
+        elif graph.node[str(i)]['visited']:
+            affected = False
+            for edge in wrong_paths:
+                if (str(i) == edge[0] or str(i) == edge[1]) and (not affected):
+                    node_colors.append("#881177")               # purple for affected AS's
+                    affected = True
+            if not affected:
+                node_colors.append("#008844")                   # green for visited and not affected by hijack AS's
+        else:
+            node_colors.append("#c49102")                       # yellow for not visited
+
+    return node_colors

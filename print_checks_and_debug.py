@@ -37,9 +37,11 @@ def list_to_string_path(graph, list_path):
     return string_path
 
 
-def draw_graph(fig, graph, pos, labels, node_color):
+def draw_graph(fig, graph, pos, labels, node_color, wrong_paths, correct_paths):
     fig.clear()
     nx.draw_networkx_nodes(graph, pos, node_size=1200, node_color=node_color, alpha=0.9)  # path vector ended
     nx.draw_networkx_edges(graph, pos, width=1.0)
+    nx.draw_networkx_edges(graph, pos, edgelist=wrong_paths, width=5.0, alpha=0.6, edge_color='r')
+    nx.draw_networkx_edges(graph, pos, edgelist=correct_paths, width=5.0, alpha=0.6, edge_color='g')
     nx.draw_networkx_labels(graph, pos, labels, font_size=10)
     plt.show()

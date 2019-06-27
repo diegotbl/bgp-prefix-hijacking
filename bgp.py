@@ -33,7 +33,10 @@ def bgp_update(graph):
     # DEBUG - check if number of accessible ips match for each AS
     if print_checks_and_debug.check_all_ips_are_accessible(graph):
         print("Protocol succeeded! All AS's can access all announced ip's. Printing final graph.")
-        print_checks_and_debug.draw_graph(fig, graph, pos, labels, "#008800")
+        wrong_paths, correct_paths = path_vector.find_correct_and_wrong_paths(graph)
+        node_colors = path_vector.node_coloring(graph, wrong_paths)
+
+        print_checks_and_debug.draw_graph(fig, graph, pos, labels, node_colors, wrong_paths, correct_paths)
 
     else:
         print("Protocol failed! Not all AS's can access all announced ip's.")
@@ -90,7 +93,6 @@ def bgp_hijack(graph, ip, aut_sys):
     # AS announces ip on the hijack field
     graph.node[aut_sys]['hijack'].append(ip)
     index = path_vector.eval_index_path_to_update(graph, '0', ip)
-    print(index)
     graph.node[aut_sys]['path'][index] = [aut_sys]
     bgp_update(graph)
 
