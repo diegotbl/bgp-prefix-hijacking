@@ -152,3 +152,9 @@ def path_source_ip(graph, source, ip):
     print("path from " + graph.node[source]['label'] + " to AS that announced ip " + ip + " is: ")
     print("\t" + string_path)
     print("\n")
+
+
+def list_paths(graph, ip):
+    """List current paths from all AS's to that IP"""
+    for i in range(len(graph)):
+        path_source_ip(graph, str(i), ip)

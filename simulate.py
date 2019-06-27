@@ -1,4 +1,5 @@
 import bgp
+import path_vector
 
 
 def simulate(graph):
@@ -10,6 +11,8 @@ def simulate(graph):
     # Now we select an IP and an AS. Both can be random or user-provided
     ip = bgp.select_ip(graph)
     aut_sys = bgp.select_as(graph, ip)
+    path_vector.list_paths(graph, ip)
 
-    # Now, the hijacking
-    bgp.bgp_hijack(graph)
+    print("\nNow that we have a consistent network, a victim IP and an attacker AS, we can start the hijack itself.\n")
+
+    bgp.bgp_hijack(graph, ip, aut_sys)

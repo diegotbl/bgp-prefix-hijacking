@@ -39,12 +39,12 @@ def bgp_update(graph):
         print("Protocol failed! Not all AS's can access all announced ip's.")
 
     # DEBUG - check some paths to see if they are as expected
-    path_vector.path_source_ip(graph, "0", "23.1.208.0/20")
-    path_vector.path_source_ip(graph, "0", "213.130.32.0/19")
-    path_vector.path_source_ip(graph, "0", "143.137.84.0/23")
-    path_vector.path_source_ip(graph, "1", "23.1.208.0/20")
-    path_vector.path_source_ip(graph, "1", "213.130.32.0/19")
-    path_vector.path_source_ip(graph, "1", "143.137.84.0/23")
+    # path_vector.path_source_ip(graph, "0", "23.1.208.0/20")
+    # path_vector.path_source_ip(graph, "0", "213.130.32.0/19")
+    # path_vector.path_source_ip(graph, "0", "143.137.84.0/23")
+    # path_vector.path_source_ip(graph, "1", "23.1.208.0/20")
+    # path_vector.path_source_ip(graph, "1", "213.130.32.0/19")
+    # path_vector.path_source_ip(graph, "1", "143.137.84.0/23")
 
     return graph
 
@@ -92,5 +92,5 @@ def select_as(graph, ip):
         return node_id
 
 
-def bgp_hijack(graph):
+def bgp_hijack(graph, ip, aut_sys):
     pass
