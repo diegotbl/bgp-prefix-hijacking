@@ -38,21 +38,13 @@ def bgp_update(graph):
     else:
         print("Protocol failed! Not all AS's can access all announced ip's.")
 
-    # DEBUG - check some paths to see if they are as expected
-    # path_vector.path_source_ip(graph, "0", "23.1.208.0/20")
-    # path_vector.path_source_ip(graph, "0", "213.130.32.0/19")
-    # path_vector.path_source_ip(graph, "0", "143.137.84.0/23")
-    # path_vector.path_source_ip(graph, "1", "23.1.208.0/20")
-    # path_vector.path_source_ip(graph, "1", "213.130.32.0/19")
-    # path_vector.path_source_ip(graph, "1", "143.137.84.0/23")
-
     return graph
 
 
 def select_ip(graph):
     """Returns a valid IP value that has been announced on the network, either random or user-provided"""
 
-    ip = input("Select an IP to hijack: (type 'random' to select a random existing one)")
+    ip = input("Select an IP to hijack: (type 'random' to select a random existing one)\n")
     if ip != 'random':
         if ip not in graph.node['0']['accessible']:
             print("The provided IP has not been announced on this network.")
@@ -93,4 +85,12 @@ def select_as(graph, ip):
 
 
 def bgp_hijack(graph, ip, aut_sys):
-    pass
+    """Hijacking itself. Steps: attacker AS announces IP that has already been announced. BGP announces this new IP and
+    some paths are updated according to path vector protocol, i.e. some ASs will be redirected to the malicious AS"""
+    # AS announces ip on the hijack field
+    graph.node[aut_sys]['hijack'].append(ip)
+    index = path_vector.eval_index_path_to_update(graph, '0', ip)
+    print(index)
+    graph.node[aut_sys]['path'][index] = [aut_sys]
+    bgp_update(graph)
+

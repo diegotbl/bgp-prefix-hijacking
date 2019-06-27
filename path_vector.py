@@ -37,14 +37,6 @@ def bgp_update(graph):
         print("Protocol failed! Not all AS's can access all announced ip's.")
         exit()
 
-    # DEBUG - check some paths to see if they are as expected
-    path_source_ip(graph, "0", "23.1.208.0/20")
-    path_source_ip(graph, "0", "213.130.32.0/19")
-    path_source_ip(graph, "0", "143.137.84.0/23")
-    path_source_ip(graph, "1", "23.1.208.0/20")
-    path_source_ip(graph, "1", "213.130.32.0/19")
-    path_source_ip(graph, "1", "143.137.84.0/23")
-
     return graph
 
 
@@ -65,7 +57,7 @@ def path_vector(graph, q, fig, pos, labels):
                 for neighbor in neighbors:
                     if not graph.node[neighbor]['visited']:
                         send(graph, node_string, neighbor)
-                        print_checks_and_debug.print_nodes(graph)                                            # DEBUG
+                        print_checks_and_debug.print_nodes(graph)                           # DEBUG
                         q.put(neighbor)                                                     # add neighbor to queue
                         print(graph.node[neighbor]['label'] + " has been added to queue")   # DEBUG
 
@@ -88,14 +80,10 @@ def path_vector(graph, q, fig, pos, labels):
 
     # Unfortunately FuncAnimation doesn't accept a dynamic frame number, so we need to specify a sufficiently big
     # number so that all nodes are visited and the queue is empty at the end
-    ani = matplotlib.animation.FuncAnimation(fig, update, frames=6, interval=300, repeat=False)
+    ani = matplotlib.animation.FuncAnimation(fig, update, frames=6, interval=100, repeat=False)
     plt.show(block=False)  # display
     plt.pause(3)  # display
     plt.close()
-
-
-def bgp_hijack(graph):
-    pass
 
 
 def send(graph, source_id, dest_id):

@@ -6,8 +6,8 @@ def read():
     """Loads graph on format GEXF and initializes attributes. Returns graph on networkX format"""
 
     # Important variables
-    n_ip_announced = 0    # Total amount of announced ip's
-    path = []    # Variable to initialize path attribute
+    n_ip_announced = 0      # Total amount of announced ip's
+    path = []               # Variable to initialize path attribute
 
     # Request name of graph source file
     # file = input("Type gexf file name (without extension): ")
@@ -41,6 +41,10 @@ def read():
     for i in range(len(graph)):
         for j in range(n_ip_announced):
             graph.node[str(i)]['path'][j].append(str(i))
+
+    # Initializing empty hijack table
+    for i in range(len(graph)):
+        graph.node[str(i)]['hijack'] = []       # This is where new announced ip's will be added to do the hijacking
 
     print("Graph loaded\n")
 
