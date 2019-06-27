@@ -1,11 +1,14 @@
-import path_vector
+import bgp
 
 
 def simulate(graph):
     """Starts BGP simulation: Draws, runs BGP algorithm and BGP Hijacking"""
 
     # Starts by updating all tables to make all ip's accessible for all AS's using path vector protocol
-    path_vector.bgp_update(graph)
+    bgp.bgp_update(graph)
+
+    # Now we select an IP and an AS. Both can be random or user-provided
+    ip = bgp.select_ip(graph)
 
     # Now, the hijacking
-    path_vector.bgp_hijack(graph)
+    bgp.bgp_hijack(graph)

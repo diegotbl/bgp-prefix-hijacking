@@ -1,11 +1,11 @@
 import loader
 import simulate
-import debug
+import print_checks_and_debug
 
 
 def main():
     graph = loader.read()               # loads graph
-    debug.print_nodes(graph)            # DEBUG
+    print_checks_and_debug.print_nodes(graph)            # DEBUG
     simulate.simulate(graph)            # simulation
 
 

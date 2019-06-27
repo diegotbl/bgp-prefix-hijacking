@@ -1,7 +1,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib.animation
-import debug
+import print_checks_and_debug
 import queue
 
 
@@ -29,12 +29,13 @@ def bgp_update(graph):
         path_vector(graph, q, fig, pos, labels)                                 # runs algorithm and animates
 
     # DEBUG - check if number of accessible ips match for each AS
-    if debug.check_all_ips_are_accessible(graph):
+    if print_checks_and_debug.check_all_ips_are_accessible(graph):
         print("Protocol succeeded! All AS's can access all announced ip's. Printing final graph.")
-        draw_graph(fig, graph, pos, labels, "#008800")
+        print_checks_and_debug.draw_graph(fig, graph, pos, labels, "#008800")
 
     else:
         print("Protocol failed! Not all AS's can access all announced ip's.")
+        exit()
 
     # DEBUG - check some paths to see if they are as expected
     path_source_ip(graph, "0", "23.1.208.0/20")
@@ -64,7 +65,7 @@ def path_vector(graph, q, fig, pos, labels):
                 for neighbor in neighbors:
                     if not graph.node[neighbor]['visited']:
                         send(graph, node_string, neighbor)
-                        debug.print_nodes(graph)                                            # DEBUG
+                        print_checks_and_debug.print_nodes(graph)                                            # DEBUG
                         q.put(neighbor)                                                     # add neighbor to queue
                         print(graph.node[neighbor]['label'] + " has been added to queue")   # DEBUG
 
@@ -79,7 +80,7 @@ def path_vector(graph, q, fig, pos, labels):
             else:                                                                   # red for not visited
                 node_colors.append("#880000")
 
-        draw_graph(fig, graph, pos, labels, node_colors)
+        print_checks_and_debug.draw_graph(fig, graph, pos, labels, node_colors)
 
         if q.empty():
             print("empty queue")  # DEBUG
@@ -88,7 +89,9 @@ def path_vector(graph, q, fig, pos, labels):
     # Unfortunately FuncAnimation doesn't accept a dynamic frame number, so we need to specify a sufficiently big
     # number so that all nodes are visited and the queue is empty at the end
     ani = matplotlib.animation.FuncAnimation(fig, update, frames=6, interval=300, repeat=False)
-    plt.show()  # display
+    plt.show(block=False)  # display
+    plt.pause(3)  # display
+    plt.close()
 
 
 def bgp_hijack(graph):
@@ -141,32 +144,11 @@ def eval_index_path_to_update(graph, source_id, ip):
 
 
 def path_source_ip(graph, source, ip):
-    """Shows path traveled by a packet from source AS to a destination AS that has announced the informed ip"""
+    """Shows path traveled by a packet from source AS to a destination AS that has announced the informed IP"""
 
     path = graph.node[source]['path'][eval_index_path_to_update(graph, source, ip)]
-    string_path = list_to_string_path(graph, path)
+    string_path = print_checks_and_debug.list_to_string_path(graph, path)
 
     print("path from " + graph.node[source]['label'] + " to AS that announced ip " + ip + " is: ")
     print("\t" + string_path)
     print("\n")
-
-
-def list_to_string_path(graph, list_path):
-    """Converts a path list to a more comprehensible string path. Example: [1916, 262847] becomes "1916 -> 262847" """
-
-    string_path = ""
-    for node in list_path:
-        if string_path != "":
-            string_path = string_path + " -> " + graph.node[node]['label']
-        else:
-            string_path = graph.node[node]['label']
-
-    return string_path
-
-
-def draw_graph(fig, graph, pos, labels, node_color):
-    fig.clear()
-    nx.draw_networkx_nodes(graph, pos, node_size=1200, node_color=node_color, alpha=0.9)  # path vector ended
-    nx.draw_networkx_edges(graph, pos, width=1.0)
-    nx.draw_networkx_labels(graph, pos, labels, font_size=10)
-    plt.show()
