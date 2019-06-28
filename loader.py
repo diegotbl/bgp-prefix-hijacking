@@ -14,7 +14,7 @@ def read():
     # Each file requires a different frames parameter on animation at path_vector.path_vector
     # network_sample requires frame=6
     # network1 requires frame=17
-    # network2 requires frame=20000
+    # network2 requires frame=23
 
     file = "network2"
     file = file + ".gexf"

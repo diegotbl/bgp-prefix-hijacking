@@ -1,87 +1,49 @@
-import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib.animation
-import print_checks_and_debug
-import queue
+import print_checks_and_debug as pcd
 
 
-def bgp_update(graph):
-    """Updates accessible ips and paths, using path vector algorithm for each node"""
-
-    # Figure initialization
-    pos = nx.spring_layout(graph)                                               # positions for all nodes
-    labels = {}                                                                 # labels definition
-    for i in range(len(graph)):
-        labels[str(i)] = graph.node[str(i)]['label']
-
-    q = queue.Queue()                                                           # create queue
-
-    for i in range(len(graph)):                                                 # for each node in the graph
-        fig, ax = plt.subplots(figsize=(12, 6))
-        ax.remove()
-        print("node " + graph.node[str(i)]['label'] + ":")                      # DEBUG
-        q.put(str(i))                                                           # initialize queue to start até node i
-        print("node " + str(i) + " added to queue")                             # DEBUG
-        for j in range(len(graph)):                                             # sets 'visited' fields to false
-            graph.node[str(j)]['visited'] = False
-        print("Visited fields set to false\n")                                  # DEBUG
-
-        path_vector(graph, q, fig, pos, labels)                                 # runs algorithm and animates
-
-    # DEBUG - check if number of accessible ips match for each AS
-    if print_checks_and_debug.check_all_ips_are_accessible(graph):
-        print("Protocol succeeded! All AS's can access all announced ip's. Printing final graph.")
-        wrong_paths, correct_paths = find_correct_and_wrong_paths(graph)
-        node_colors = node_coloring(graph, wrong_paths)
-        print_checks_and_debug.draw_graph(fig, graph, pos, labels, node_colors, wrong_paths, correct_paths)
-
-    else:
-        print("Protocol failed! Not all AS's can access all announced ip's.")
-        exit()
-
-    return graph
-
-
-def path_vector(graph, q, fig, pos, labels):
+def path_vector(graph, q, fig, pos, labels, ip):
     """Runs path vector protocol on the graph"""
 
     def update(num):
         # Gets first element of queue and find its neighbors
         if q.empty() is False:
             node_string = q.get()
-            print("node " + graph.node[node_string]['label'] + " removed from queue")       # DEBUG
             neighbors = list(graph.neighbors(node_string))
             if not graph.node[node_string]['visited']:
                 # Sends message asking for each neighbor to add announced ip's
                 for neighbor in neighbors:
                     if not graph.node[neighbor]['visited']:
                         send(graph, node_string, neighbor)
-                        print_checks_and_debug.print_nodes(graph)                           # DEBUG
                         q.put(neighbor)                                                     # add neighbor to queue
-                        print(graph.node[neighbor]['label'] + " has been added to queue")   # DEBUG
 
                 graph.node[node_string]['visited'] = True                                   # sets AS as visited
-                print(graph.node[node_string]['label'] + " has been visited")               # DEBUG
 
         wrong_paths, correct_paths = find_correct_and_wrong_paths(graph)
 
         # Specifying colors for nodes
-        node_colors = node_coloring(graph, wrong_paths)
+        node_colors = node_coloring(graph, wrong_paths, ip)
 
-        print_checks_and_debug.draw_graph(fig, graph, pos, labels, node_colors, wrong_paths, correct_paths)
+        pcd.draw_graph(fig, graph, pos, labels, node_colors, wrong_paths, correct_paths)
 
         if q.empty():
-            print("empty queue")                                                    # DEBUG
+            print("empty queue\n")                                                    # DEBUG
             return
 
     # Unfortunately FuncAnimation doesn't accept a dynamic frame number, so we need to specify a sufficiently big
     # number so that all nodes are visited and the queue is empty at the end
+    frames = 23
     if has_been_hijacked(graph):
-        ani = matplotlib.animation.FuncAnimation(fig, update, frames=200000, interval=100, repeat=False)
+        interval = 200
+        ani = matplotlib.animation.FuncAnimation(fig, update, frames=frames, interval=interval, repeat=False)
+        plt.show(block=False)                                                       # display
+        plt.pause(frames*interval/1000 + 1.2)
     else:
-        ani = matplotlib.animation.FuncAnimation(fig, update, frames=200000, interval=1, repeat=False)
-    plt.show(block=False)                                                           # display
-    plt.pause(3)
+        interval = 200
+        ani = matplotlib.animation.FuncAnimation(fig, update, frames=frames, interval=interval, repeat=False)
+        plt.show(block=False)                                                       # display
+        plt.pause(frames*interval/1000 + 1.2)
     plt.close()
 
 
@@ -133,7 +95,7 @@ def path_source_ip(graph, source, ip):
     """Shows path traveled by a packet from source AS to a destination AS that has announced the informed IP"""
 
     path = graph.node[source]['path'][eval_index_path_to_update(graph, source, ip)]
-    string_path = print_checks_and_debug.list_to_string_path(graph, path)
+    string_path = pcd.list_to_string_path(graph, path)
 
     print("path from " + graph.node[source]['label'] + " to AS that announced ip " + ip + " is: ")
     print("\t" + string_path)
@@ -204,11 +166,13 @@ def has_been_hijacked(graph):
     return False
 
 
-def node_coloring(graph, wrong_paths):
+def node_coloring(graph, wrong_paths, ip):
     node_colors = []
 
     for i in range(len(graph)):
-        if graph.node[str(i)]['hijack']:
+        if ip in graph.node[str(i)]['announced']:
+            node_colors.append('#000088')                       # blue for original source
+        elif graph.node[str(i)]['hijack']:
             node_colors.append("#880000")                       # red for attacker
         elif graph.node[str(i)]['visited']:
             affected = False

@@ -1,12 +1,12 @@
 import path_vector
 import networkx as nx
 import matplotlib.pyplot as plt
-import print_checks_and_debug
+import print_checks_and_debug as pcd
 import queue
 from random import randint
 
 
-def bgp_update(graph):
+def bgp_update(graph, ip):
     """Updates accessible ips and paths, using path vector algorithm for each node. The goal is to make each IP
     accessible to any AS so we can see the attack take place later"""
 
@@ -21,22 +21,20 @@ def bgp_update(graph):
     for i in range(len(graph)):                                                 # for each node in the graph
         fig, ax = plt.subplots(figsize=(12, 6))
         ax.remove()
-        print("node " + graph.node[str(i)]['label'] + ":")                      # DEBUG
+        print("node " + graph.node[str(i)]['label'] + ":\n")                    # DEBUG
         q.put(str(i))                                                           # initialize queue to start at node i
-        print("node " + str(i) + " added to queue")                             # DEBUG
         for j in range(len(graph)):                                             # sets 'visited' fields to false
             graph.node[str(j)]['visited'] = False
-        print("Visited fields set to false\n")                                  # DEBUG
 
-        path_vector.path_vector(graph, q, fig, pos, labels)                     # runs algorithm and animates
+        path_vector.path_vector(graph, q, fig, pos, labels, ip)                 # runs algorithm and animates
 
     # DEBUG - check if number of accessible ips match for each AS
-    if print_checks_and_debug.check_all_ips_are_accessible(graph):
+    if pcd.check_all_ips_are_accessible(graph):
         print("Protocol succeeded! All AS's can access all announced ip's. Printing final graph.")
         wrong_paths, correct_paths = path_vector.find_correct_and_wrong_paths(graph)
-        node_colors = path_vector.node_coloring(graph, wrong_paths)
+        node_colors = path_vector.node_coloring(graph, wrong_paths, ip)
 
-        print_checks_and_debug.draw_graph(fig, graph, pos, labels, node_colors, wrong_paths, correct_paths)
+        pcd.draw_graph(fig, graph, pos, labels, node_colors, wrong_paths, correct_paths)
 
     else:
         print("Protocol failed! Not all AS's can access all announced ip's.")
@@ -94,5 +92,7 @@ def bgp_hijack(graph, ip, aut_sys):
     graph.node[aut_sys]['hijack'].append(ip)
     index = path_vector.eval_index_path_to_update(graph, '0', ip)
     graph.node[aut_sys]['path'][index] = [aut_sys]
-    bgp_update(graph)
+    graph = bgp_update(graph, ip)
+
+    return graph
 
