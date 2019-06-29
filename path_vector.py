@@ -28,22 +28,22 @@ def path_vector(graph, q, fig, pos, labels, ip):
         pcd.draw_graph(fig, graph, pos, labels, node_colors, wrong_paths, correct_paths)
 
         if q.empty():
-            print("empty queue\n")                                                    # DEBUG
+            print("Done\n")                                                    # DEBUG
             return
 
     # Unfortunately FuncAnimation doesn't accept a dynamic frame number, so we need to specify a sufficiently big
     # number so that all nodes are visited and the queue is empty at the end
     frames = 23
     if has_been_hijacked(graph):
-        interval = 200
+        interval = 300
         ani = matplotlib.animation.FuncAnimation(fig, update, frames=frames, interval=interval, repeat=False)
         plt.show(block=False)                                                       # display
-        plt.pause(frames*interval/1000 + 1.2)
+        plt.pause(frames*interval/1000 + 1.5)
     else:
         interval = 200
         ani = matplotlib.animation.FuncAnimation(fig, update, frames=frames, interval=interval, repeat=False)
         plt.show(block=False)                                                       # display
-        plt.pause(frames*interval/1000 + 1.2)
+        plt.pause(frames*interval/1000 + 1.5)
     plt.close()
 
 

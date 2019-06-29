@@ -10,13 +10,14 @@ def read():
     path = []               # Variable to initialize path attribute
 
     # Request name of graph source file
-    # file = input("Type gexf file name (without extension): ")
+    file = input("Type gexf file name (without extension): ")
     # Each file requires a different frames parameter on animation at path_vector.path_vector
     # network_sample requires frame=6
     # network1 requires frame=17
     # network2 requires frame=23
 
-    file = "network2"
+    # file = "network_sample"
+    # file = "network2"
     file = file + ".gexf"
 
     # Loading graph from GEXF file

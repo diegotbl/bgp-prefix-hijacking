@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import print_checks_and_debug as pcd
 import queue
 from random import randint
+import path_vector
 
 
 def bgp_update(graph, ip):
@@ -18,15 +19,28 @@ def bgp_update(graph, ip):
 
     q = queue.Queue()                                                           # create queue
 
-    for i in range(len(graph)):                                                 # for each node in the graph
+    if path_vector.has_been_hijacked(graph):
         fig, ax = plt.subplots(figsize=(12, 6))
         ax.remove()
-        print("node " + graph.node[str(i)]['label'] + ":\n")                    # DEBUG
-        q.put(str(i))                                                           # initialize queue to start at node i
-        for j in range(len(graph)):                                             # sets 'visited' fields to false
+        for i in range(len(graph)):
+            if graph.node[str(i)]['hijack']:
+                hijacker = str(i)
+        print("node " + graph.node[hijacker]['label'] + ":\n")  # DEBUG
+        q.put(hijacker)  # initialize queue to start at node i
+        for j in range(len(graph)):  # sets 'visited' fields to false
             graph.node[str(j)]['visited'] = False
 
-        path_vector.path_vector(graph, q, fig, pos, labels, ip)                 # runs algorithm and animates
+        path_vector.path_vector(graph, q, fig, pos, labels, ip)  # runs algorithm and animates
+    else:
+        for i in range(len(graph)):                                                 # for each node in the graph
+            fig, ax = plt.subplots(figsize=(12, 6))
+            ax.remove()
+            print("node " + graph.node[str(i)]['label'] + ":\n")                    # DEBUG
+            q.put(str(i))                                                           # initialize queue to start at node i
+            for j in range(len(graph)):                                             # sets 'visited' fields to false
+                graph.node[str(j)]['visited'] = False
+
+            path_vector.path_vector(graph, q, fig, pos, labels, ip)                 # runs algorithm and animates
 
     # DEBUG - check if number of accessible ips match for each AS
     if pcd.check_all_ips_are_accessible(graph):
